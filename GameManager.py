@@ -1,11 +1,3 @@
-def get_players_info():
-    from main import pls
-    gcr = 0
-    for x in pls:
-        print("Player: " + x.name, "\nLevel: " + x.level, "\nClass: " + x.cl)
-        gcr += x.level
-    return gcr
-
 
 class Game:
 
@@ -13,34 +5,40 @@ class Game:
         self.kills = kills
         self.deaths = deaths
         self.floor = floor
+    pls = []
+    gcr = 0
 
+    def get_players_info(self):
+        for x in self.pls:
+            print(x.name)
+            self.gcr += x.level
 
-class Monster:
-    def __init__(self):
-        self.health = 10
-        self.dmg = 2
-        self. loot = []
-        self.level = self.health + self.dmg
+    def game_start(self):
+        g = Game(1, 0, 0)
+        self.get_players_info(Game)
+        print("Floor: " + str(g.floor))
+        print("Game start")
+        self.encounter(Game)
 
+    def encounter(self):
+        self.Monster.monster_gen(Game)
 
-def game_start():
-    g = Game(1, 0, 0)
-    get_players_info()
-    print("Floor: " + str(g.floor))
-    print("Game start")
-    encounter()
+    class Monster:
+        def __init__(self):
+            self.health = 10
+            self.dmg = 2
+            self. loot = []
+            self.level = self.health + self.dmg
 
+        def monster_gen(self):
+            global m
+            m = Game.Monster()
+            #Buffing from Player Callenge Rating
+            m.health *= Game.gcr
+            m.dmg += Game.gcr
 
-def encounter():
-    monster_gen()
+            for a in m.__dict__.items():
+                if a == ('loot', []):
+                    continue
+                print(a)
 
-
-def monster_gen():
-    global m
-    m = Monster()
-    #Player Callenge Rating
-    m.health *= get_players_info()
-    m.dmg += get_players_info()
-
-    for a in m.__dict__.keys():
-        print(a)
