@@ -23,6 +23,7 @@ def player_creator():
     Player.cl = "Villager"
     Player.level = 1
     Game.pls = [Player]
+    Player.stats = [Player.name, Player.sex, Player.cl, Player.level]
 
 
 #Player Object Template
@@ -32,6 +33,7 @@ class Player:
         self. sex = sex
         self.cl = cl
         self.level = level
+    stats = []
 
 
 class Game:
@@ -42,6 +44,7 @@ class Game:
         self.floor = floor
     pls = []
     gcr = 0
+    m = None
 
     def get_players_info(self):
         for x in self.pls:
@@ -58,6 +61,7 @@ class Game:
     def encounter(self):
         self.Monster.monster_gen(Game)
 
+
     class Monster:
         def __init__(self):
             self.health = 10
@@ -66,7 +70,6 @@ class Game:
             self.level = self.health + self.dmg
 
         def monster_gen(self):
-            global m
             m = Game.Monster()
             #Buffing from Player Callenge Rating
             m.health *= Game.gcr
@@ -77,20 +80,23 @@ class Game:
                     continue
                 print(a)
 
+    # Start game
+    def setup_game(self):
+        self.game_start(Game)
+
 
 #New player
 def new_player():
     player_creator()
 
 
-#Start game
-def setup_game():
-    Game.game_start(Game)
-
-
 if __name__ == '__main__':
     new_player()
-    setup_game()
-    print(Player)
+    Game.game_start(Game)
+    for p in Player.stats:
+        if p == Player.level:
+            print("Level: " + str(p))
+            continue
+        print(p)
 
 
