@@ -51,40 +51,44 @@ def player_creator():
             p.level = 1
             p.hpMod = 30
             p.dmgMod = 3
-            p.Equ['wepDmg'] = 2
-            p.Inv = []
+            p.Equ = []
+            p.Inv = [p.Equ]
             p.maxHP = + (p.level * p.hpMod)
-            p.dmg = p.Equ['wepDmg'] * p.dmgMod
+            Game.equip_stats(Game) #func to get total modified dmg
             p.entType = 'player'
             p.stats = {'Name': p.name, 'Sex': p.sex, 'Class': p.cl, 'Level': p.level, 'Health': p.maxHP, 'Damage': p.dmg}
         elif p.cl == 'Warrior':
             p.level = 1
             p.hpMod = 50
             p.dmgMod = 1
-            p.Equ['wepDmg'] = 1
-            p.Inv = []
+            p.Equ = []
+            p.Inv = [p.Equ]
             p.maxHP = + (p.level * p.hpMod)
-            p.dmg = p.Equ['wepDmg'] * p.dmgMod
+            Game.equip_stats(Game) #func to get total modified dmg
             p.entType = 'player'
             p.stats = {'Name': p.name, 'Sex': p.sex, 'Class': p.cl, 'Level': p.level, 'Health': p.maxHP, 'Damage': p.dmg}
         elif p.cl == 'Mage':
             p.level = 1
             p.hpMod = 10
             p.dmgMod = 5
-            p.Equ['wepDmg'] = 4
-            p.Inv = []
+            p.Equ = [Items.Glove, Items.Weapon, Items.Boots, Items.Armor]
+            p.Inv = [p.Equ]
             p.maxHP = + (p.level * p.hpMod)
-            p.dmg = p.Equ['wepDmg'] * p.dmgMod
+            Game.equip_stats(Game) #func to get total modified dmg
             p.entType = 'player'
-            p.stats = {'Name': p.name, 'Sex': p.sex, 'Class': p.cl, 'Level': p.level, 'Health': p.maxHP, 'Damage': p.dmg}
+            p.stats = {'Name': p.name, 'Sex': p.sex,
+                       'Class': p.cl, 'Level': p.level,
+                       'Health': p.maxHP, 'Damage': p.dmg,
+                       'Defence': p.dr
+                       }
         else:
             p.level = 1
             p.hpMod = 10
             p.dmgMod = 1
-            p.Equ['wepDmg'] = 1
-            p.Inv = []
+            p.Equ = []
+            p.Inv = [p.Equ]
             p.maxHP = + (p.level * p.hpMod)
-            p.dmg = p.Equ['wepDmg'] * p.dmgMod
+            Game.equip_stats(Game) #func to get total modified dmg
             p.entType = 'player'
             p.stats = {'Name': p.name, 'Sex': p.sex, 'Class': p.cl, 'Level': p.level, 'Health': p.maxHP, 'Damage': p.dmg}
 
@@ -94,15 +98,13 @@ def player_creator():
     pick_name()
     pick_sex()
     pick_class()
-    build_class()
-
     Game.pls = [p]
 
 
 
 #Player Object Template
 class Player:
-    def __init__(self,  name, sex, cl, level, hpMod, maxHP, dmgMod, dmg, entType):
+    def __init__(self,  name, sex, cl, level, hpMod, maxHP, dmgMod, dmg, dr, entType, speed=1):
         self.name = name
         self. sex = sex
         self.cl = cl
@@ -111,8 +113,10 @@ class Player:
         self.dmgMod = dmgMod
         self.maxHP = maxHP
         self.dmg = dmg
+        self.dr = dr
         self.entType = entType
-    Equ = {}
+        self.speed = speed
+    Equ = []
     Inv = []
     stats = {}
 
@@ -123,6 +127,29 @@ class Skills:
         name = "Stab"
         Game.m.health -= Game.damage_calc(Game, p.dmg)
         print(p.name + " used " + name)
+
+
+class Items:
+
+    class Glove:
+        name = "Glove"
+        dur = 10
+        atk = 5
+
+    class Weapon:
+        name = "Weapon"
+        dur = 10
+        atk = 20
+
+    class Boots:
+        name = "Boots"
+        dur = 10
+        dr = 5
+
+    class Armor:
+        name = "Armor"
+        dur = 10
+        dr = 10
 
 
 class Game:
@@ -160,7 +187,7 @@ class Game:
         return
 
     def monster_gen(self):
-        Game.m = self.Monster(random.randint(1, p.stats['Level'] + 1), 2, entType='mob')
+        Game.m = self.Monster(random.randint(1, p.stats['Level'] + 1), 2, entType='mob', speed=1)
         Game.m.name = 'Monster'  # Placeholder for random monster name picker
         # Buffing from Player Challenge Rating
         Game.m.health *= Game.m.level
@@ -189,13 +216,30 @@ class Game:
     def damage_calc(self, d):
         return d  #Place holder for more complex dmg calc
 
+    def equip_stats(self):
+        dm = p.dmgMod
+        a = 0
+        d = 0
+        al = ['Weapon', 'Glove']
+        dl = ['Boots', 'Armor']
+        for b in p.Equ:
+            if b.name in al:
+                a += b.atk
+                continue
+            elif b.name in dl:
+                d += b.dr
+                continue
+        p.dmg = a * dm
+        p.dr = d
+
     class Monster:
-        def __init__(self, health, dmg, entType):
+        def __init__(self, health, dmg, entType, speed):
             self.health = health
             self.dmg = dmg
             self.loot = []
             self.level = self.health + self.dmg
             self.entType = entType
+            self.speed = speed
 
     # Start game
     def setup_game(self):
@@ -206,8 +250,8 @@ class Game:
 def new_player():
     global p
     #Clear everything
-    p = Player('', '', '', 0, 0, 0, 0, 0, 'player')
-    p.Equ = {}
+    p = Player('', '', '', 0, 0, 0, 0, 0, 0, 'player', 1)
+    p.Equ = []
     p.Inv = []
     p.stats = {}
     #Start Character creation
